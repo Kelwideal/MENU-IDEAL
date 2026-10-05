@@ -1,0 +1,18 @@
+MENU IDEAL - VERSÃO ATUALIZADA
+
+Abra o arquivo index.html para acessar o menu.
+
+Itens:
+- Carta de Cancelamento
+- Aprovador
+- Ficha de Renda Informal
+- Previsão de Gastos
+- Faixas de Enquadramento
+- Documentações Necessárias
+
+Documentações atualizadas:
+- Comprador
+- Vendedor Pessoa Física
+- Vendedor Pessoa Jurídica
+
+Mantenha todos os arquivos e pastas juntos para que os links internos funcionem.

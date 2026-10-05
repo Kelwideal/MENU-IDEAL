@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentações Necessárias | IDEAL</title>
+<style>
+:root{--azul:#0d57a5;--azul-escuro:#083b73;--laranja:#f59a23;--fundo:#f3f7fb;--texto:#17324d;--cinza:#66788a}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--fundo);color:var(--texto)}
+header{background:linear-gradient(135deg,var(--azul-escuro),var(--azul));color:#fff;padding:22px 24px}.top{max-width:1000px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}.top h1{margin:0;font-size:1.55rem}.voltar{color:white;text-decoration:none;border:1px solid rgba(255,255,255,.35);padding:10px 14px;border-radius:12px}.voltar:hover{background:rgba(255,255,255,.12)}
+main{max-width:1000px;margin:auto;padding:46px 24px}.intro{text-align:center;margin-bottom:32px}.intro h2{font-size:clamp(1.6rem,4vw,2.4rem);margin:0 0 10px;color:var(--azul-escuro)}.intro p{color:var(--cinza)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:white;border-radius:22px;padding:26px;min-height:240px;box-shadow:0 14px 38px rgba(19,54,88,.12);border:1px solid rgba(13,87,165,.08);transition:.2s}.card:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(19,54,88,.18)}.icon{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;background:var(--c);color:white;font-weight:800;font-size:1.15rem;margin-bottom:24px}.card h3{margin:0 0 10px;color:var(--azul-escuro)}.card p{margin:0;color:var(--cinza);line-height:1.45}.go{margin-top:auto;padding-top:22px;display:flex;gap:9px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:10px;padding:9px 12px;font-size:.86rem;font-weight:750;transition:.18s}.btn-view{background:color-mix(in srgb,var(--c) 10%,white);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 20%,white)}.btn-download{background:var(--c);color:#fff;box-shadow:0 5px 12px color-mix(in srgb,var(--c) 20%,transparent)}.btn:hover{transform:translateY(-1px);filter:brightness(.98)}
+footer{text-align:center;padding:24px;color:#6c8091;background:white;border-top:1px solid #e2eaf1;font-size:.88rem}@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.card{min-height:200px}}
+</style>
+</head>
+<body>
+<header><div class="top"><h1>IDEAL • Documentações Necessárias</h1><a class="voltar" href="index.html">← Voltar ao menu</a></div></header>
+<main>
+<section class="intro"><h2>Escolha o tipo de documentação</h2><p>Selecione o checklist que deseja consultar.</p></section>
+<section class="grid">
+<div class="card" style="--c:#2aa9e8"><div class="icon">C</div><h3>Comprador</h3><p>Relação de documentos necessários para o comprador.</p><div class="go"><a class="btn btn-view" href="documentacoes/comprador.jpeg" target="_blank" rel="noopener">Visualizar ↗</a><a class="btn btn-download" href="documentacoes/comprador.jpeg" download="Checklist-Comprador-IDEAL.jpeg" onclick="baixarArquivo(event,this)">Baixar ↓</a></div></div>
+<div class="card" style="--c:#15a66b"><div class="icon">PF</div><h3>Vendedor Pessoa Física</h3><p>Relação de documentos necessários para vendedor pessoa física.</p><div class="go"><a class="btn btn-view" href="documentacoes/vendedor-pf.jpeg" target="_blank" rel="noopener">Visualizar ↗</a><a class="btn btn-download" href="documentacoes/vendedor-pf.jpeg" download="Checklist-Vendedor-PF-IDEAL.jpeg" onclick="baixarArquivo(event,this)">Baixar ↓</a></div></div>
+<div class="card" style="--c:#f59a23"><div class="icon">PJ</div><h3>Vendedor Pessoa Jurídica</h3><p>Relação de documentos necessários para vendedor pessoa jurídica.</p><div class="go"><a class="btn btn-view" href="documentacoes/vendedor-pj.jpeg" target="_blank" rel="noopener">Visualizar ↗</a><a class="btn btn-download" href="documentacoes/vendedor-pj.jpeg" download="Checklist-Vendedor-PJ-IDEAL.jpeg" onclick="baixarArquivo(event,this)">Baixar ↓</a></div></div>
+</section>
+</main>
+<footer>IDEAL Despachante Imobiliário • (34) 3219-0859</footer>
+
+<script>
+async function baixarArquivo(event, link) {
+  event.preventDefault();
+  try {
+    const resposta = await fetch(link.href);
+    if (!resposta.ok) throw new Error('Falha ao baixar o arquivo');
+    const blob = await resposta.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = link.getAttribute('download') || 'arquivo';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (erro) {
+    // Fallback: mantém o download nativo do navegador.
+    window.location.href = link.href;
+  }
+}
+</script>
+
+</body></html>

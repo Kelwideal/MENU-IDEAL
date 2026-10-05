@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Previsão de Gastos - IDEAL v2</title>
+<style>
+  :root{
+    --bg:#f3f5f7;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+    --accent:#0f766e;
+    --accent-dark:#115e59;
+    --soft:#ecfdf5;
+    --warning:#92400e;
+    --warning-bg:#fffbeb;
+    --info:#1e3a8a;
+    --info-bg:#eff6ff;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  .wrap{
+    max-width:1120px;
+    margin:30px auto;
+    padding:0 18px 40px;
+  }
+
+  .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+    margin-bottom:20px;
+  }
+
+  .brand h1{
+    margin:0;
+    font-size:29px;
+  }
+
+  .brand p{
+    margin:5px 0 0;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .badge{
+    background:var(--soft);
+    color:var(--accent-dark);
+    border:1px solid #a7f3d0;
+    padding:9px 13px;
+    border-radius:999px;
+    font-weight:700;
+    font-size:13px;
+    white-space:nowrap;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 4px 14px rgba(0,0,0,.04);
+  }
+
+  .full{grid-column:1/-1}
+
+  .card h2{
+    margin:0 0 16px;
+    font-size:19px;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+
+  input,select{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    font-size:15px;
+    background:#fff;
+    color:var(--text);
+    outline:none;
+  }
+
+  input:focus,select:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px rgba(15,118,110,.08);
+  }
+
+  input[readonly]{
+    background:#f9fafb;
+  }
+
+  .hint{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:5px;
+    line-height:1.4;
+  }
+
+  .rows{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+
+  .row{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:11px 0;
+    border-bottom:1px dashed var(--line);
+    align-items:flex-start;
+  }
+
+  .row:last-child{border-bottom:none}
+
+  .name{
+    font-size:14px;
+    line-height:1.35;
+  }
+
+  .value{
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  .approx::before{
+    content:"+/- ";
+  }
+
+  .editable-tag{
+    display:inline-block;
+    margin-left:6px;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    background:#f3f4f6;
+    color:#4b5563;
+    padding:3px 6px;
+    border-radius:5px;
+    vertical-align:middle;
+  }
+
+  .notice{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    background:var(--warning-bg);
+    color:var(--warning);
+    font-size:13px;
+    line-height:1.45;
+    border:1px solid #fde68a;
+  }
+
+  .info{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    background:var(--info-bg);
+    color:var(--info);
+    font-size:13px;
+    line-height:1.45;
+    border:1px solid #bfdbfe;
+  }
+
+  .summary{
+    background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:white;
+  }
+
+  .summary h2{color:#fff}
+
+  .total-big{
+    font-size:35px;
+    font-weight:800;
+    margin:8px 0 4px;
+  }
+
+  .summary small{
+    opacity:.92;
+  }
+
+  .subtotals{
+    margin-top:16px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+  }
+
+  .subtotal{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.17);
+    border-radius:10px;
+    padding:11px;
+  }
+
+  .subtotal span{
+    display:block;
+    font-size:11px;
+    opacity:.85;
+    margin-bottom:4px;
+  }
+
+  .subtotal strong{
+    font-size:14px;
+  }
+
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+
+  button{
+    border:none;
+    border-radius:10px;
+    padding:11px 15px;
+    font-weight:700;
+    cursor:pointer;
+    font-size:14px;
+  }
+
+  .primary{
+    background:var(--accent);
+    color:white;
+  }
+
+  .secondary{
+    background:#fff;
+    border:1px solid #d1d5db;
+    color:var(--text);
+  }
+
+  .mini{
+    margin-top:8px;
+    background:#eef2ff;
+    color:#3730a3;
+    padding:7px 10px;
+    font-size:12px;
+  }
+
+  .radio-box{
+    display:flex;
+    gap:12px;
+  }
+
+  .radio-option{
+    flex:1;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+  }
+
+  .radio-option input{
+    width:auto;
+    margin:0;
+  }
+
+  @media(max-width:800px){
+    .grid,.form-grid,.subtotals{
+      grid-template-columns:1fr;
+    }
+    .full{grid-column:auto}
+    .top{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+  }
+
+
+  .print-only{display:none}
+
+  .print-sheet{color:#17324d;font-family:Inter,Segoe UI,Arial,sans-serif}
+  .print-header{border:1px solid #dce7f0;border-radius:16px;overflow:hidden;margin-bottom:16px}
+  .print-header-main{background:linear-gradient(135deg,#083b73,#0d57a5);color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .print-brand{font-size:11px;font-weight:800;letter-spacing:.12em;opacity:.9;text-transform:uppercase}
+  .print-title{font-size:23px;font-weight:850;margin:5px 0 0}
+  .print-subtitle{font-size:11px;margin-top:4px;opacity:.86}
+  .print-chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:7px 10px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap}
+  .print-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:#f7fafc;border-top:1px solid rgba(255,255,255,.08)}
+  .print-meta div{padding:9px 12px;border-right:1px solid #e2eaf1;font-size:10px}.print-meta div:last-child{border-right:none}.print-meta strong{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.07em;color:#718397;margin-bottom:2px}.print-meta span{font-weight:750;color:#17324d}
+  .print-block{border:1px solid #e1e9f0;border-radius:12px;padding:11px 13px;margin-bottom:10px;break-inside:avoid;page-break-inside:avoid;background:#fff}
+  .print-block h2,.print-when h2{font-size:12.5px;margin:0 0 7px;color:#083b73}
+  .print-block h2{padding-bottom:6px;border-bottom:2px solid #eef3f7}
+  .print-block p{margin:3px 0;font-size:10.5px;line-height:1.35;color:#3d5367}
+  .print-total{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#0d57a5,#083b73);color:#fff;font-size:12px;font-weight:800;break-inside:avoid;page-break-inside:avoid}.print-total strong{font-size:16px}
+  .print-when{border-top:2px solid #e4edf4;padding-top:11px;margin-top:13px}.print-when h2{font-size:13px;margin-bottom:8px}.print-when p{margin:0 0 6px;font-size:9.6px;line-height:1.35;color:#4d6172;text-align:justify}.print-footer{margin-top:14px;padding-top:8px;border-top:1px solid #dfe7ee;display:flex;justify-content:space-between;gap:15px;font-size:8.5px;color:#718397}.print-footer strong{color:#17324d}
+
+  @media print{
+    @page{size:A4;margin:10mm 12mm}
+    body{background:#fff;color:#17324d;font-family:Inter,Segoe UI,Arial,sans-serif}
+    .wrap{max-width:none;margin:0;padding:0}
+    .top,.grid,.actions{display:none !important}
+    .print-only{display:block !important}
+    .print-sheet{width:100%;margin:0;padding:0}
+    .print-header{margin-bottom:12px}.print-header-main{padding:13px 15px}.print-title{font-size:20px}.print-subtitle{font-size:9.5px}.print-chip{font-size:8.5px;padding:6px 8px}.print-meta div{padding:7px 9px;font-size:8.5px}.print-meta strong{font-size:7px}
+    .print-block{padding:8px 10px;margin-bottom:7px}.print-block h2,.print-when h2{font-size:10.5px;margin-bottom:5px}.print-block h2{padding-bottom:4px}.print-block p{font-size:9px;line-height:1.25;margin:2px 0}.print-total{margin:8px 0;padding:8px 10px;font-size:10px}.print-total strong{font-size:13px}.print-when{margin-top:9px;padding-top:8px}.print-when h2{font-size:10.5px;margin-bottom:6px}.print-when p{font-size:8.1px;line-height:1.23;margin-bottom:4px}.print-footer{margin-top:8px;padding-top:5px;font-size:7.2px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <h1>Previsão de Gastos</h1>
+      <p>IDEAL • Simulação automática de custos do financiamento imobiliário</p>
+    </div>
+    <div class="badge">Versão 2 • Cálculo automático</div>
+  </div>
+
+  <div class="grid">
+
+    <section class="card full">
+      <h2>Dados do financiamento</h2>
+
+      <div class="form-grid">
+
+        <div>
+          <label>Modalidade</label>
+          <select id="modalidade">
+            <option value="mcmv">Minha Casa Minha Vida</option>
+            <option value="sbpe">SBPE</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Primeiro imóvel do cliente?</label>
+          <select id="primeiroImovel">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+          </select>
+          <div class="hint">Se for o primeiro imóvel, o registro usa a coluna “Metade 5-e”.</div>
+        </div>
+
+        <div>
+          <label>Valor do imóvel</label>
+          <input id="imovel" class="money" inputmode="numeric" placeholder="R$ 0,00">
+        </div>
+
+        <div>
+          <label>Valor financiado</label>
+          <input id="financiado" class="money" inputmode="numeric" placeholder="R$ 0,00">
+        </div>
+
+        <div>
+          <label>Valor da entrada</label>
+          <input id="entrada" class="money" inputmode="numeric" placeholder="Automático">
+          <div class="hint">Se ficar vazio, será considerado: valor do imóvel − valor financiado.</div>
+        </div>
+
+        <div>
+          <label>Renda mensal do cliente</label>
+          <input id="renda" class="money" inputmode="numeric" placeholder="R$ 0,00">
+        </div>
+
+        <div>
+          <label>Salário mínimo utilizado</label>
+          <input id="salarioMinimo" class="money" inputmode="numeric" value="R$ 1.621,00">
+          <div class="hint">O limite de 6 salários mínimos é recalculado automaticamente.</div>
+        </div>
+
+        <div>
+          <label>Limite para regra do ITBI</label>
+          <input id="limite" readonly>
+          <div class="hint">Até 6 salários: 2% da entrada + 0,5% do financiamento.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>📌 1. Custos com a Caixa Econômica Federal</h2>
+
+      <div class="rows">
+        <div class="row">
+          <span class="name">Taxa do engenheiro – 1ª parte</span>
+          <span class="value">R$ 750,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name">Relacionamento Caixa<br><small>1% do valor financiado</small></span>
+          <span class="value approx" id="vRelacionamento">R$ 0,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name">Taxa à vista da engenharia</span>
+          <span class="value approx" id="vEngenhariaVistaResumo">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label>Taxa à vista da engenharia <span class="editable-tag">editável</span></label>
+        <input id="engenhariaVista" class="money" inputmode="numeric" value="R$ 0,00">
+        <button class="mini" id="usarSugerido" type="button">Usar valor calculado pela regra</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🏢 2. Gastos com o correspondente (IDEAL)</h2>
+
+      <div class="rows">
+        <div class="row">
+          <span class="name">Serviço de despachante (Ideal)</span>
+          <input id="despachante" class="money" inputmode="numeric" value="R$ 590,00" style="max-width:140px;text-align:right;">
+        </div>
+
+        <div class="row">
+          <span class="name">Impressões e xerox do processo</span>
+          <span class="value">R$ 30,00</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🏛️ 3. Imposto ITBI – Prefeitura de Uberlândia</h2>
+
+      <div class="rows">
+        <div class="row">
+          <span class="name">Tarifa de avaliação (Prefeitura)</span>
+          <span class="value">R$ 22,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name">ITBI</span>
+          <span class="value approx" id="vItbi">R$ 0,00</span>
+        </div>
+      </div>
+
+      
+    </section>
+
+    <section class="card">
+      <h2>📜 4. Registro – Cartório de Imóveis</h2>
+
+      <div class="rows">
+        <div class="row">
+          <span class="name" id="labelAtoImovel">1 ato sobre o valor do imóvel</span>
+          <span class="value approx" id="vAtoImovel">R$ 0,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name" id="labelAtoFinanciamento">1 ato sobre o valor financiado</span>
+          <span class="value approx" id="vAtoFinanciamento">R$ 0,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name"><strong>Total estimado do registro</strong></span>
+          <span class="value approx" id="vRegistro">R$ 0,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name">Emolumentos adicionais</span>
+          <span class="value">R$ 300,00</span>
+        </div>
+
+        <div class="row">
+          <span class="name">Matrícula de Ônus (cartório)</span>
+          <span class="value">R$ 175,09</span>
+        </div>
+      </div>
+
+      
+    </section>
+
+    <section class="card full summary">
+      <h2>💰 Resumo Final dos Gastos</h2>
+
+      <div class="total-big" id="total">+/- R$ 0,00</div>
+      <small>Valor estimado. Itens variáveis podem sofrer alteração no fechamento do processo.</small>
+
+      <div class="subtotals">
+        <div class="subtotal">
+          <span>Caixa</span>
+          <strong id="subCaixa">+/- R$ 0,00</strong>
+        </div>
+
+        <div class="subtotal">
+          <span>IDEAL</span>
+          <strong id="subIdeal">R$ 620,00</strong>
+        </div>
+
+        <div class="subtotal">
+          <span>Prefeitura / ITBI</span>
+          <strong id="subItbi">+/- R$ 22,00</strong>
+        </div>
+
+        <div class="subtotal">
+          <span>Cartório</span>
+          <strong id="subCartorio">+/- R$ 175,09</strong>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  
+<section class="print-only print-sheet">
+  <div class="print-header">
+    <div class="print-header-main">
+      <div>
+        <div class="print-brand">IDEAL DESPACHANTE IMOBILIÁRIO</div>
+        <div class="print-title">Previsão de Gastos</div>
+        <div class="print-subtitle">Simulação automática de custos do financiamento imobiliário</div>
+      </div>
+      <div class="print-chip">ESTIMATIVA</div>
+    </div>
+    <div class="print-meta">
+      <div><strong>Modalidade</strong><span id="pModalidade">Minha Casa Minha Vida</span></div>
+      <div><strong>Valor do imóvel</strong><span id="pImovel">R$ 0,00</span></div>
+      <div><strong>Valor financiado</strong><span id="pFinanciado">R$ 0,00</span></div>
+    </div>
+  </div>
+
+  <div class="print-block">
+    <h2>📌 1. Custos com a Caixa Econômica Federal</h2>
+    <p>Taxa do engenheiro 1ª parte: <strong>R$ 750,00</strong></p>
+    <p>Relacionamento Caixa: <strong id="pRelacionamento">R$ 0,00</strong> (+/-)</p>
+    <p>Taxa à vista da engenharia: <strong id="pEngenhariaVista">R$ 0,00</strong> (+/-)</p>
+  </div>
+
+  <div class="print-block">
+    <h2>🏢 2. Gastos com o correspondente (IDEAL)</h2>
+    <p>Serviço de despachante (Ideal): <strong id="pDespachante">R$ 590,00</strong></p>
+    <p>Impressões e xerox do processo: <strong>R$ 30,00</strong></p>
+  </div>
+
+  <div class="print-block">
+    <h2>🏛️ 3. Imposto ITBI – Prefeitura de Uberlândia</h2>
+    <p>Tarifa de avaliação (Prefeitura): <strong>R$ 22,00</strong></p>
+    <p>ITBI: <strong id="pItbi">R$ 0,00</strong> (+/-)</p>
+  </div>
+
+  <div class="print-block">
+    <h2>📜 4. Registro – Cartório de Imóveis</h2>
+    <p>Registro: <strong id="pRegistro">R$ 0,00</strong> (+/-)</p>
+    <p>Emolumentos adicionais: <strong>R$ 300,00</strong></p>
+    <p>Matrícula de Ônus (cartório): <strong>R$ 175,09</strong></p>
+  </div>
+
+  <div class="print-total"><span>💰 Resumo Final dos Gastos</span><strong id="pTotal">R$ 0,00</strong> (+/-)</div>
+
+  <div class="print-when">
+    <h2>QUANDO VIRÃO OS GASTOS?</h2>
+    <p><strong>1ª taxa de engenharia (Caixa):</strong> logo após a aprovação, é o primeiro passo para convocar o engenheiro e dar sequência com o processo.</p>
+    <p><strong>Matrícula de Ônus (cartório):</strong> assim que chegar o laudo da engenharia, quando o(s) cliente(s) for(em) vir assinar as primeiras fichas cadastrais. No dia que chegar o laudo, via boleto.</p>
+    <p><strong>Relacionamento (Caixa):</strong> assim que o processo estiver conforme, o cliente vai na agência para fazer a entrevista com o gerente e a fidelização com a Caixa. Cerca de 3 dias após o pagamento da matrícula de Ônus, negociável com o gerente.</p>
+    <p><strong>Serviço de despachante (Ideal):</strong> a qualquer momento depois que sair o laudo de engenharia, no máximo até a assinatura do contrato Caixa. Via transferência bancária.</p>
+    <p><strong>Taxa à vista da engenharia (Caixa):</strong> no momento da assinatura do contrato Caixa. Cerca de 2 a 3 dias após a entrevista com o gerente.</p>
+    <p><strong>ITBI (prefeitura):</strong> assim que o contrato for assinado, tiramos uma cópia e solicitamos na prefeitura. Cerca de 2 a 3 dias depois da assinatura do contrato Caixa, via boleto.</p>
+    <p><strong>Registro (cartório):</strong> assim que a prefeitura liberar a certidão negativa do imóvel, damos entrada. Cerca de 2 dias depois do pagamento do ITBI, via transferência bancária.</p>
+  </div>
+
+  <div class="print-footer"><span><strong>Ideal Despachante Imobiliário</strong> • Tv. Canápolis, 167 - Martins, Uberlândia - MG</span><span>(34) 3219-0859 • (34) 99238-6612</span></div>
+</section>
+
+<div class="actions">
+    <button class="primary" onclick="window.print()">Imprimir / Salvar em PDF</button>
+    <button class="secondary" id="limpar" type="button">Limpar simulação</button>
+  </div>
+
+</div>
+
+<script>
+const FIXOS = {
+  engenheiro1: 750,
+  despachante: 590,
+  xerox: 30,
+  prefeitura: 22,
+  onus: 175.09
+};
+
+/*
+  Tabela 4 - Item 5-e - Registro 2026
+  Cada faixa possui:
+  - mínimo
+  - máximo
+  - valor normal
+  - valor "Metade 5-e"
+*/
+const TABELA_REGISTRO = [
+  {min:0,          max:1400.00,     normal:227.95,   metade:113.98},
+  {min:1400.01,    max:2720.00,     normal:371.84,   metade:185.92},
+  {min:2720.01,    max:5440.00,     normal:538.85,   metade:269.43},
+  {min:5440.01,    max:7000.00,     normal:745.98,   metade:372.99},
+  {min:7000.01,    max:14000.00,    normal:994.78,   metade:497.39},
+  {min:14000.01,   max:28000.00,    normal:1285.21,  metade:642.61},
+  {min:28000.01,   max:42000.00,    normal:1616.57,  metade:808.29},
+  {min:42000.01,   max:56000.00,    normal:1989.94,  metade:994.97},
+  {min:56000.01,   max:70000.00,    normal:2404.60,  metade:1202.30},
+  {min:70000.01,   max:105000.00,   normal:3026.34,  metade:1513.17},
+  {min:105000.01,  max:140000.00,   normal:3839.67,  metade:1919.84},
+  {min:140000.01,  max:175000.00,   normal:4106.03,  metade:2053.02},
+  {min:175000.01,  max:210000.00,   normal:4372.88,  metade:2186.44},
+  {min:210000.01,  max:280000.00,   normal:4914.86,  metade:2457.43},
+  {min:280000.01,  max:350000.00,   normal:5050.25,  metade:2525.13},
+  {min:350000.01,  max:420000.00,   normal:5186.26,  metade:2593.13},
+  {min:420000.01,  max:560000.00,   normal:5677.78,  metade:2838.89},
+  {min:560000.01,  max:700000.00,   normal:5989.84,  metade:2994.92},
+  {min:700000.01,  max:840000.00,   normal:6302.53,  metade:3151.27},
+  {min:840000.01,  max:1120000.00,  normal:7046.73,  metade:3523.37},
+  {min:1120000.01, max:1400000.00,  normal:7632.83,  metade:3816.42},
+  {min:1400000.01, max:1680000.00,  normal:8219.92,  metade:4109.96},
+  {min:1680000.01, max:3200000.00,  normal:8808.22,  metade:4404.11},
+  {min:3200000.01, max:3700000.00,  normal:13034.69, metade:6517.35}
+];
+
+const ACIMA_3700 = {
+  base:3700000,
+  faixa:500000,
+  adicionalNormal:2254.46,
+  adicionalMetade:1127.23,
+  limiteFaixas:100
+};
+
+const el = id => document.getElementById(id);
+
+function moeda(v){
+  return (Number(v)||0).toLocaleString('pt-BR',{
+    style:'currency',
+    currency:'BRL'
+  });
+}
+
+function parseMoeda(valor){
+  if(typeof valor === 'number') return valor;
+  if(!valor) return 0;
+
+  let txt = String(valor)
+    .replace(/\s/g,'')
+    .replace('R$','')
+    .replace(/\./g,'')
+    .replace(',','.');
+
+  const n = parseFloat(txt);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatarCampoMoeda(input){
+  const digits = input.value.replace(/\D/g,'');
+  if(!digits){
+    input.value = '';
+    return;
+  }
+
+  const numero = Number(digits) / 100;
+  input.value = moeda(numero);
+}
+
+document.querySelectorAll('.money').forEach(input=>{
+  input.addEventListener('input',()=>{
+    formatarCampoMoeda(input);
+    if(input.id === 'engenhariaVista'){
+      engenhariaFoiAlteradaManual = true;
+    }
+    atualizar();
+  });
+
+  input.addEventListener('focus',()=>{
+    if(input.value === 'R$ 0,00') input.select();
+  });
+});
+
+function valorCampo(id){
+  return parseMoeda(el(id).value);
+}
+
+function calcularRegistro(valorBase, primeiroImovel){
+  if(valorBase <= 0) return 0;
+
+  const faixa = TABELA_REGISTRO.find(f => valorBase >= f.min && valorBase <= f.max);
+
+  if(faixa){
+    return primeiroImovel ? faixa.metade : faixa.normal;
+  }
+
+  // Acima de R$ 3.700.000,00:
+  // usa o valor da última faixa + adicional a cada R$ 500.000,00 ou fração,
+  // limitado a 100 faixas adicionais.
+  if(valorBase > ACIMA_3700.base){
+    let qtdAdicionais = Math.ceil((valorBase - ACIMA_3700.base) / ACIMA_3700.faixa);
+    qtdAdicionais = Math.min(qtdAdicionais, ACIMA_3700.limiteFaixas);
+
+    const ultima = TABELA_REGISTRO[TABELA_REGISTRO.length - 1];
+    const base = primeiroImovel ? ultima.metade : ultima.normal;
+    const adicional = primeiroImovel
+      ? ACIMA_3700.adicionalMetade
+      : ACIMA_3700.adicionalNormal;
+
+    return base + (qtdAdicionais * adicional);
+  }
+
+  return 0;
+}
+
+let engenhariaFoiAlteradaManual = false;
+let sugestaoEngenharia = 0;
+
+function calcularSugestaoEngenharia(){
+  const financiado = valorCampo('financiado');
+
+  if(el('modalidade').value === 'mcmv'){
+    return Math.max(0, financiado * 0.015 - 650);
+  }
+
+  return 300;
+}
+
+function atualizar(forcarEngenharia=false){
+  const imovel = valorCampo('imovel');
+  const financiado = valorCampo('financiado');
+  const renda = valorCampo('renda');
+  const salarioMinimo = valorCampo('salarioMinimo') || 1621;
+  const limite = salarioMinimo * 6;
+
+  el('limite').value = moeda(limite);
+
+  let entrada;
+  if(el('entrada').value.trim() === ''){
+    entrada = Math.max(0, imovel - financiado);
+  }else{
+    entrada = valorCampo('entrada');
+  }
+
+  // CAIXA
+  const relacionamento = financiado * 0.01;
+  el('vRelacionamento').textContent = moeda(relacionamento);
+
+  sugestaoEngenharia = calcularSugestaoEngenharia();
+
+  if(el('modalidade').value === 'mcmv'){
+    }
+  if(forcarEngenharia || !engenhariaFoiAlteradaManual){
+    el('engenhariaVista').value = moeda(sugestaoEngenharia);
+  }
+
+  const engenhariaVista = valorCampo('engenhariaVista');
+  el('vEngenhariaVistaResumo').textContent = moeda(engenhariaVista);
+
+  // ITBI
+  let itbi = 0;
+
+  if(renda <= limite){
+    itbi = (entrada * 0.02) + (financiado * 0.005);
+
+    }else{
+    itbi = imovel * 0.02;
+
+      }
+
+  el('vItbi').textContent = moeda(itbi);
+
+  // CARTÓRIO
+  const primeiroImovel = el('primeiroImovel').value === 'sim';
+
+  const atoImovel = calcularRegistro(imovel, primeiroImovel);
+  const atoFinanciamento = calcularRegistro(financiado, primeiroImovel);
+  const registroTotal = atoImovel + atoFinanciamento;
+
+  el('vAtoImovel').textContent = moeda(atoImovel);
+  el('vAtoFinanciamento').textContent = moeda(atoFinanciamento);
+  el('vRegistro').textContent = moeda(registroTotal);
+
+  if(primeiroImovel){
+    el('labelAtoImovel').textContent='1 ato sobre o imóvel – Metade 5-e';
+    el('labelAtoFinanciamento').textContent='1 ato sobre o financiamento – Metade 5-e';
+  }else{
+    el('labelAtoImovel').textContent='1 ato sobre o valor do imóvel';
+    el('labelAtoFinanciamento').textContent='1 ato sobre o valor financiado';
+  }
+
+  // SUBTOTAIS
+  const subCaixa =
+    FIXOS.engenheiro1 +
+    relacionamento +
+    engenhariaVista;
+
+  const subIdeal =
+    valorCampo('despachante') +
+    FIXOS.xerox;
+
+  const subItbi =
+    FIXOS.prefeitura +
+    itbi;
+
+  const subCartorio =
+    registroTotal + 300 +
+    FIXOS.onus;
+
+  const total =
+    subCaixa +
+    subIdeal +
+    subItbi +
+    subCartorio;
+
+  el('subCaixa').textContent = '+/- ' + moeda(subCaixa);
+  el('subIdeal').textContent = moeda(subIdeal);
+  el('subItbi').textContent = '+/- ' + moeda(subItbi);
+  el('subCartorio').textContent = '+/- ' + moeda(subCartorio);
+
+  el('total').textContent = '+/- ' + moeda(total);
+
+  // Resumo exclusivo para impressão
+  el('pRelacionamento').textContent = moeda(relacionamento);
+  el('pEngenhariaVista').textContent = moeda(engenhariaVista);
+  el('pDespachante').textContent = moeda(valorCampo('despachante'));
+  el('pItbi').textContent = moeda(itbi);
+  el('pRegistro').textContent = moeda(registroTotal);
+  el('pTotal').textContent = moeda(total);
+  el('pModalidade').textContent = el('modalidade').value === 'mcmv' ? 'Minha Casa Minha Vida' : 'SBPE';
+  el('pImovel').textContent = moeda(imovel);
+  el('pFinanciado').textContent = moeda(financiado);
+}
+
+['despachante'].forEach(id=>{el(id).addEventListener('input',()=>{formatarCampoMoeda(el(id));atualizar();});});
+
+['modalidade','primeiroImovel'].forEach(id=>{
+  el(id).addEventListener('change',()=>{
+    if(id === 'modalidade'){
+      engenhariaFoiAlteradaManual = false;
+      atualizar(true);
+    }else{
+      atualizar();
+    }
+  });
+});
+
+el('usarSugerido').addEventListener('click',()=>{
+  engenhariaFoiAlteradaManual = false;
+  el('engenhariaVista').value = moeda(sugestaoEngenharia);
+  atualizar();
+});
+
+el('limpar').addEventListener('click',()=>{
+  el('modalidade').value = 'mcmv';
+  el('primeiroImovel').value = 'nao';
+
+  ['imovel','financiado','entrada','renda'].forEach(id=>{
+    el(id).value = '';
+  });
+
+  el('salarioMinimo').value = moeda(1621);
+  engenhariaFoiAlteradaManual = false;
+  atualizar(true);
+});
+
+atualizar(true);
+</script>
+
+</body>
+</html>
